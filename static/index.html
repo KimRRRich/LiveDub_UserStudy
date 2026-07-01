@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>User Study 评分</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section id="loginView" class="panel">
+        <div>
+          <p class="kicker">User Study</p>
+          <h1>视频主观评分</h1>
+          <p class="muted">请输入用户名或参与者编号后开始。刷新页面后可以继续未完成的评分。</p>
+        </div>
+        <form id="loginForm" class="login-form">
+          <label for="username">用户名 / 编号</label>
+          <div class="login-row">
+            <input id="username" name="username" autocomplete="name" required maxlength="80" />
+            <button type="submit">开始</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="studyView" class="study hidden">
+        <header class="topbar">
+          <div>
+            <p class="kicker" id="participantLabel"></p>
+            <h1 id="progressTitle">评分</h1>
+          </div>
+          <div class="progress-wrap" aria-label="评分进度">
+            <div id="progressText" class="progress-text">0 / 0</div>
+            <div class="progress-track">
+              <div id="progressBar" class="progress-bar"></div>
+            </div>
+          </div>
+        </header>
+
+        <form id="ratingForm" class="workspace">
+          <div class="sample-meta">
+            <span id="sampleIndex"></span>
+            <span id="saveStatus" class="save-status"></span>
+          </div>
+          <section id="videoGrid" class="video-grid" aria-label="同一样本的多个方法视频"></section>
+          <div class="actions">
+            <button type="button" id="prevBtn" class="secondary">上一个样本</button>
+            <button type="submit" id="nextBtn">保存并下一个样本</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="doneView" class="panel hidden">
+        <p class="kicker">完成</p>
+        <h1>感谢，评分已提交</h1>
+        <p class="muted">你可以关闭页面。若需要修改，重新输入同一个用户名，或点击下面按钮回到评分记录。</p>
+        <button type="button" id="editDoneBtn">继续修改评分</button>
+      </section>
+    </main>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

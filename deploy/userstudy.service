@@ -1,0 +1,19 @@
+[Unit]
+Description=User Study Rating Server
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/userstudy
+Environment=ADMIN_TOKEN=change-this-token
+Environment=DATA_DIR=/opt/userstudy/data
+Environment=VIDEO_DIR=/opt/userstudy/videos
+Environment=VIDEO_MANIFEST=/opt/userstudy/videos.json
+ExecStart=/opt/userstudy/.venv/bin/uvicorn app:app --host 127.0.0.1 --port 8000
+Restart=always
+RestartSec=3
+User=www-data
+Group=www-data
+
+[Install]
+WantedBy=multi-user.target

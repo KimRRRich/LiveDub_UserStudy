@@ -4,27 +4,33 @@
 
 ## 功能
 
-- 用户输入用户名或参与者编号
+- 用户输入用户名和密码
+- 新用户名会自动注册，并使用首次输入的密码作为登录密码
+- 已注册用户名必须密码正确才能继续评分；密码错误会提示用户名已注册或密码错误
 - 每个用户的样本顺序随机，并保存在服务端
 - 同一样本下的 4-5 个方法视频放在同一个页面中对比
 - 播放其中一个视频时，其他视频会自动暂停，避免声音叠加
 - 四个维度 1-5 分：画面质量、遮挡情况、唇形同步、牙齿质量
 - 每条方法视频都会单独保存四个维度评分到 SQLite
-- 刷新后继续评分
-- 已完成用户重新输入同一用户名后可以继续修改评分
+- 样本导航支持三态：已完成绿色、部分完成橙色、未开始白色
+- 已开始的样本必须完整评分；未开始样本可跳过并提前提交
+- 刷新后可用用户名和密码继续评分
+- 已完成用户可重新登录继续修改评分
 - 完成后提交
-- 管理员导出 CSV
+- 管理员登录后台查看注册人数、完成进度、方法/视频平均分
+- 管理员后台一键导出已有评分 CSV
+- 管理员后台可删除单个用户、清空单个用户评分、清空所有用户和评分
 - 前端不显示方法名，但数据库和 CSV 会记录 method
 
 ## 本地运行
 
 ```bash
-cd /home/kim/work/UserStudy
+cd /home/kim/work/LiveDub_UserStudy
 python3 -m venv .venv
 . .venv/bin/activate
 pip install -r requirements.txt
 python tools/build_manifest.py --video-dir videos --output videos.json
-ADMIN_TOKEN=your-secret-token uvicorn app:app --host 0.0.0.0 --port 8000
+ADMIN_TOKEN=my-token ADMIN_USERNAME=admin ADMIN_PASSWORD=123456 uvicorn app:app --host 0.0.0.0 --port 8000
 ```
 
 打开：
@@ -43,6 +49,26 @@ http://服务器IP:8000/api/health
 
 ```text
 http://服务器IP:8000/api/export.csv?token=your-secret-token
+```
+
+管理员后台：
+
+```text
+http://服务器IP:8000
+```
+
+使用 `ADMIN_USERNAME` 和 `ADMIN_PASSWORD` 登录。如果没有设置 `ADMIN_PASSWORD`，系统会使用 `ADMIN_TOKEN` 作为管理员密码。
+
+默认管理员用户名是：
+
+```text
+admin
+```
+
+默认管理员密码规则：
+
+```text
+优先使用 ADMIN_PASSWORD；如果没有设置 ADMIN_PASSWORD，则使用 ADMIN_TOKEN。
 ```
 
 ## 视频命名
@@ -116,7 +142,7 @@ sudo apt install -y certbot python3-certbot-nginx
 
 ```bash
 sudo mkdir -p /opt/userstudy
-sudo rsync -av --exclude ".venv" /home/kim/work/UserStudy/ /opt/userstudy/
+sudo rsync -av --exclude ".venv" /home/kim/work/LiveDub_UserStudy/ /opt/userstudy/
 ```
 
 2. 安装 Python 依赖：
@@ -148,7 +174,12 @@ sudo cp /opt/userstudy/deploy/userstudy.service /etc/systemd/system/userstudy.se
 sudo nano /etc/systemd/system/userstudy.service
 ```
 
-把 `ADMIN_TOKEN=change-this-token` 改成你自己的随机字符串。
+把 `ADMIN_TOKEN=change-this-token` 改成你自己的随机字符串，并设置：
+
+```text
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=你的管理员密码
+```
 
 启动服务：
 

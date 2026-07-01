@@ -12,12 +12,14 @@
         <div>
           <p class="kicker">User Study</p>
           <h1>视频主观评分</h1>
-          <p class="muted">请输入用户名或参与者编号后开始。刷新页面后可以继续未完成的评分。</p>
+          <p class="muted">新用户名会自动注册；已有用户名需要输入正确密码后继续评分。</p>
         </div>
         <form id="loginForm" class="login-form">
-          <label for="username">用户名 / 编号</label>
           <div class="login-row">
+            <label for="username">用户名 / 编号</label>
             <input id="username" name="username" autocomplete="name" required maxlength="80" />
+            <label for="password">密码</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" required maxlength="128" placeholder="密码" />
             <button type="submit">开始</button>
           </div>
         </form>
@@ -29,15 +31,19 @@
             <p class="kicker" id="participantLabel"></p>
             <h1 id="progressTitle">评分</h1>
           </div>
-          <div class="progress-wrap" aria-label="评分进度">
-            <div id="progressText" class="progress-text">0 / 0</div>
-            <div class="progress-track">
-              <div id="progressBar" class="progress-bar"></div>
+          <div class="study-tools">
+            <div class="progress-wrap" aria-label="评分进度">
+              <div id="progressText" class="progress-text">0 / 0</div>
+              <div class="progress-track">
+                <div id="progressBar" class="progress-bar"></div>
+              </div>
             </div>
+            <button type="button" id="logoutBtn" class="secondary">退出登录</button>
           </div>
         </header>
 
         <form id="ratingForm" class="workspace">
+          <nav id="sampleNav" class="sample-nav" aria-label="样本跳转"></nav>
           <div class="sample-meta">
             <span id="sampleIndex"></span>
             <span id="saveStatus" class="save-status"></span>
@@ -46,6 +52,7 @@
           <div class="actions">
             <button type="button" id="prevBtn" class="secondary">上一个样本</button>
             <button type="submit" id="nextBtn">保存并下一个样本</button>
+            <button type="button" id="earlySubmitBtn" class="secondary">提前提交</button>
           </div>
         </form>
       </section>
@@ -53,8 +60,86 @@
       <section id="doneView" class="panel hidden">
         <p class="kicker">完成</p>
         <h1>感谢，评分已提交</h1>
-        <p class="muted">你可以关闭页面。若需要修改，重新输入同一个用户名，或点击下面按钮回到评分记录。</p>
-        <button type="button" id="editDoneBtn">继续修改评分</button>
+        <p class="muted">你可以关闭页面。若需要修改，重新输入用户名和密码，或点击下面按钮回到评分记录。</p>
+        <div class="panel-actions">
+          <button type="button" id="editDoneBtn">继续修改评分</button>
+          <button type="button" id="doneLogoutBtn" class="secondary">退出登录</button>
+        </div>
+      </section>
+
+      <section id="adminView" class="admin hidden">
+        <header class="topbar">
+          <div>
+            <p class="kicker">Admin</p>
+            <h1>后台统计</h1>
+          </div>
+          <div class="admin-actions">
+            <button type="button" id="adminRefreshBtn" class="secondary">刷新</button>
+            <button type="button" id="adminExportBtn">导出 CSV</button>
+            <button type="button" id="adminClearAllBtn" class="danger">清空所有用户</button>
+            <button type="button" id="adminLogoutBtn" class="secondary">退出</button>
+          </div>
+        </header>
+
+        <section id="adminSummary" class="stat-grid" aria-label="后台概览"></section>
+
+        <section class="admin-section">
+          <h2>用户进度</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>用户名</th>
+                  <th>进度</th>
+                  <th>已完成</th>
+                  <th>注册时间</th>
+                  <th>更新时间</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="adminParticipants"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="admin-section">
+          <h2>方法平均分</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>方法</th>
+                  <th>数量</th>
+                  <th>画面质量</th>
+                  <th>遮挡情况</th>
+                  <th>唇形同步</th>
+                  <th>牙齿质量</th>
+                </tr>
+              </thead>
+              <tbody id="adminMethods"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="admin-section">
+          <h2>视频平均分</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>样本</th>
+                  <th>方法</th>
+                  <th>数量</th>
+                  <th>画面质量</th>
+                  <th>遮挡情况</th>
+                  <th>唇形同步</th>
+                  <th>牙齿质量</th>
+                </tr>
+              </thead>
+              <tbody id="adminVideos"></tbody>
+            </table>
+          </div>
+        </section>
       </section>
     </main>
     <script src="/static/app.js"></script>

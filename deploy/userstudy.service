@@ -6,6 +6,8 @@ After=network.target
 Type=simple
 WorkingDirectory=/opt/userstudy
 Environment=ADMIN_TOKEN=change-this-token
+Environment=ADMIN_USERNAME=admin
+Environment=ADMIN_PASSWORD=change-this-admin-password
 Environment=DATA_DIR=/opt/userstudy/data
 Environment=VIDEO_DIR=/opt/userstudy/videos
 Environment=VIDEO_MANIFEST=/opt/userstudy/videos.json

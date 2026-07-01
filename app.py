@@ -1,7 +1,10 @@
 import csv
+import hashlib
+import hmac
 import json
 import os
 import random
+import secrets
 import sqlite3
 import uuid
 from datetime import datetime, timezone
@@ -20,12 +23,32 @@ DB_PATH = Path(os.getenv("DB_PATH", DATA_DIR / "study.db"))
 MANIFEST_PATH = Path(os.getenv("VIDEO_MANIFEST", BASE_DIR / "videos.json"))
 VIDEO_DIR = Path(os.getenv("VIDEO_DIR", BASE_DIR / "videos"))
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "")
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", ADMIN_TOKEN)
 
 SCORE_FIELDS = ("visual_quality", "occlusion", "lip_sync", "teeth_quality")
+PASSWORD_ITERATIONS = 120_000
+ADMIN_SESSIONS: set[str] = set()
 
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def hash_password(password: str, salt_hex: str | None = None) -> tuple[str, str]:
+    salt = bytes.fromhex(salt_hex) if salt_hex else secrets.token_bytes(16)
+    digest = hashlib.pbkdf2_hmac(
+        "sha256",
+        password.encode("utf-8"),
+        salt,
+        PASSWORD_ITERATIONS,
+    )
+    return salt.hex(), digest.hex()
+
+
+def password_matches(password: str, salt_hex: str, password_hash: str) -> bool:
+    _, candidate_hash = hash_password(password, salt_hex)
+    return hmac.compare_digest(candidate_hash, password_hash)
 
 
 def load_manifest() -> list[dict[str, Any]]:
@@ -142,6 +165,8 @@ def init_db() -> None:
             CREATE TABLE IF NOT EXISTS participants (
                 id TEXT PRIMARY KEY,
                 username TEXT NOT NULL UNIQUE,
+                password_salt TEXT,
+                password_hash TEXT,
                 order_json TEXT NOT NULL,
                 user_agent TEXT,
                 created_at TEXT NOT NULL,
@@ -150,6 +175,14 @@ def init_db() -> None:
             )
             """
         )
+        columns = {
+            row["name"]
+            for row in conn.execute("PRAGMA table_info(participants)").fetchall()
+        }
+        if "password_salt" not in columns:
+            conn.execute("ALTER TABLE participants ADD COLUMN password_salt TEXT")
+        if "password_hash" not in columns:
+            conn.execute("ALTER TABLE participants ADD COLUMN password_hash TEXT")
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS ratings (
@@ -172,6 +205,7 @@ def init_db() -> None:
 
 class ParticipantIn(BaseModel):
     username: str = Field(min_length=1, max_length=80)
+    password: str = Field(min_length=1, max_length=128)
     participant_id: str | None = None
 
 
@@ -186,6 +220,16 @@ class RatingIn(BaseModel):
 
 class CompleteIn(BaseModel):
     participant_id: str
+    allow_partial: bool = False
+
+
+class AdminLoginIn(BaseModel):
+    username: str = Field(min_length=1, max_length=80)
+    password: str = Field(min_length=1, max_length=128)
+
+
+class AdminUserIn(BaseModel):
+    username: str = Field(min_length=1, max_length=80)
 
 
 app = FastAPI(title="User Study Rating Server")
@@ -226,7 +270,7 @@ def videos() -> dict[str, Any]:
     return {"groups": groups, "count": len(manifest), "sample_count": len(groups)}
 
 
-def fetch_existing_participant(conn: sqlite3.Connection, participant_id: str | None, username: str) -> sqlite3.Row | None:
+def fetch_current_participant(conn: sqlite3.Connection, participant_id: str | None, username: str) -> sqlite3.Row | None:
     if participant_id:
         row = conn.execute(
             "SELECT * FROM participants WHERE id = ? AND username = ?",
@@ -234,10 +278,26 @@ def fetch_existing_participant(conn: sqlite3.Connection, participant_id: str | N
         ).fetchone()
         if row:
             return row
+    return None
+
+
+def fetch_participant_by_username(conn: sqlite3.Connection, username: str) -> sqlite3.Row | None:
     return conn.execute(
         "SELECT * FROM participants WHERE username = ?",
         (username,),
     ).fetchone()
+
+
+def set_participant_password(conn: sqlite3.Connection, participant_id: str, password: str) -> None:
+    salt, password_hash = hash_password(password)
+    conn.execute(
+        """
+        UPDATE participants
+        SET password_salt = ?, password_hash = ?, updated_at = ?
+        WHERE id = ?
+        """,
+        (salt, password_hash, utc_now(), participant_id),
+    )
 
 
 def participant_payload(conn: sqlite3.Connection, participant: sqlite3.Row) -> dict[str, Any]:
@@ -271,14 +331,25 @@ def upsert_participant(data: ParticipantIn, request: Request) -> dict[str, Any]:
     username = " ".join(data.username.strip().split())
     if not username:
         raise HTTPException(status_code=400, detail="username is required")
+    if not data.password.strip():
+        raise HTTPException(status_code=400, detail="password is required")
+    if username == ADMIN_USERNAME:
+        raise HTTPException(status_code=401, detail="该用户名已被注册或者密码错误")
 
     manifest = load_manifest()
     if not manifest:
         raise HTTPException(status_code=400, detail="videos.json has no videos")
 
     with connect() as conn:
-        existing = fetch_existing_participant(conn, data.participant_id, username)
+        current = fetch_current_participant(conn, data.participant_id, username)
+        existing = current or fetch_participant_by_username(conn, username)
         if existing:
+            if existing["password_salt"] and existing["password_hash"]:
+                if not password_matches(data.password, existing["password_salt"], existing["password_hash"]):
+                    raise HTTPException(status_code=401, detail="该用户名已被注册或者密码错误")
+            else:
+                set_participant_password(conn, existing["id"], data.password)
+                existing = fetch_participant_by_username(conn, username)
             conn.execute(
                 "UPDATE participants SET updated_at = ? WHERE id = ?",
                 (utc_now(), existing["id"]),
@@ -287,17 +358,23 @@ def upsert_participant(data: ParticipantIn, request: Request) -> dict[str, Any]:
 
         order = create_order(manifest)
         participant_id = str(uuid.uuid4())
+        password_salt, password_hash = hash_password(data.password)
         now = utc_now()
         try:
             conn.execute(
                 """
                 INSERT INTO participants
-                    (id, username, order_json, user_agent, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?)
+                    (
+                        id, username, password_salt, password_hash,
+                        order_json, user_agent, created_at, updated_at
+                    )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     participant_id,
                     username,
+                    password_salt,
+                    password_hash,
                     json.dumps(order),
                     request.headers.get("user-agent", ""),
                     now,
@@ -305,13 +382,10 @@ def upsert_participant(data: ParticipantIn, request: Request) -> dict[str, Any]:
                 ),
             )
         except sqlite3.IntegrityError:
-            row = conn.execute(
-                "SELECT * FROM participants WHERE username = ?",
-                (username,),
-            ).fetchone()
-            if row:
-                return participant_payload(conn, row)
-            raise
+            raise HTTPException(
+                status_code=409,
+                detail="该用户名已被注册或者密码错误",
+            )
 
         participant = conn.execute(
             "SELECT * FROM participants WHERE id = ?",
@@ -378,13 +452,37 @@ def save_rating(data: RatingIn) -> dict[str, Any]:
 
 @app.post("/api/complete")
 def complete(data: CompleteIn) -> dict[str, Any]:
-    total = len(load_manifest())
+    manifest = load_manifest()
+    total = len(manifest)
+    grouped = group_manifest(manifest)
+    videos_per_sample = {
+        sample_id: len(videos)
+        for sample_id, videos in grouped.items()
+    }
     with connect() as conn:
         rated = conn.execute(
             "SELECT COUNT(*) AS count FROM ratings WHERE participant_id = ?",
             (data.participant_id,),
         ).fetchone()["count"]
-        if rated < total:
+        if data.allow_partial:
+            if rated == 0:
+                raise HTTPException(status_code=400, detail="no samples completed")
+            partial = [
+                row["audio_id"]
+                for row in conn.execute(
+                    """
+                    SELECT audio_id, COUNT(*) AS count
+                    FROM ratings
+                    WHERE participant_id = ?
+                    GROUP BY audio_id
+                    """,
+                    (data.participant_id,),
+                ).fetchall()
+                if row["count"] != videos_per_sample.get(row["audio_id"], 0)
+            ]
+            if partial:
+                raise HTTPException(status_code=400, detail=f"{len(partial)} samples incomplete")
+        elif rated < total:
             raise HTTPException(status_code=400, detail=f"{rated}/{total} videos rated")
         now = utc_now()
         conn.execute(
@@ -401,13 +499,194 @@ def check_admin_token(token_query: str | None, token_header: str | None) -> None
         raise HTTPException(status_code=401, detail="invalid admin token")
 
 
+def check_admin_session(x_admin_session: str | None) -> None:
+    if not x_admin_session or x_admin_session not in ADMIN_SESSIONS:
+        raise HTTPException(status_code=401, detail="invalid admin session")
+
+
+@app.post("/api/admin/login")
+def admin_login(data: AdminLoginIn) -> dict[str, Any]:
+    if not ADMIN_PASSWORD:
+        raise HTTPException(status_code=403, detail="admin password is not configured")
+    username = " ".join(data.username.strip().split())
+    if username != ADMIN_USERNAME or not hmac.compare_digest(data.password, ADMIN_PASSWORD):
+        raise HTTPException(status_code=401, detail="该用户名已被注册或者密码错误")
+    session = secrets.token_urlsafe(32)
+    ADMIN_SESSIONS.add(session)
+    return {"ok": True, "session": session, "username": ADMIN_USERNAME}
+
+
+@app.get("/api/admin/stats")
+def admin_stats(x_admin_session: str | None = Header(default=None)) -> dict[str, Any]:
+    check_admin_session(x_admin_session)
+    manifest = load_manifest()
+    grouped = group_manifest(manifest)
+    total_videos = len(manifest)
+    with connect() as conn:
+        totals = conn.execute(
+            """
+            SELECT
+                COUNT(*) AS participants,
+                SUM(CASE WHEN completed_at IS NOT NULL THEN 1 ELSE 0 END) AS completed
+            FROM participants
+            """
+        ).fetchone()
+        rating_total = conn.execute("SELECT COUNT(*) AS count FROM ratings").fetchone()["count"]
+        participant_rows = conn.execute(
+            """
+            SELECT
+                p.username,
+                p.created_at,
+                p.updated_at,
+                p.completed_at,
+                COUNT(r.video_id) AS rated_count
+            FROM participants p
+            LEFT JOIN ratings r ON r.participant_id = p.id
+            GROUP BY p.id
+            ORDER BY p.created_at DESC
+            """
+        ).fetchall()
+        method_rows = conn.execute(
+            """
+            SELECT
+                method,
+                COUNT(*) AS rating_count,
+                AVG(visual_quality) AS visual_quality,
+                AVG(occlusion) AS occlusion,
+                AVG(lip_sync) AS lip_sync,
+                AVG(teeth_quality) AS teeth_quality
+            FROM ratings
+            GROUP BY method
+            ORDER BY method
+            """
+        ).fetchall()
+        video_rows = conn.execute(
+            """
+            SELECT
+                audio_id,
+                method,
+                video_id,
+                COUNT(*) AS rating_count,
+                AVG(visual_quality) AS visual_quality,
+                AVG(occlusion) AS occlusion,
+                AVG(lip_sync) AS lip_sync,
+                AVG(teeth_quality) AS teeth_quality
+            FROM ratings
+            GROUP BY video_id
+            ORDER BY audio_id, method
+            """
+        ).fetchall()
+
+    participants = totals["participants"] or 0
+    completed = totals["completed"] or 0
+    expected_ratings = participants * total_videos
+    return {
+        "summary": {
+            "participants": participants,
+            "completed": completed,
+            "in_progress": participants - completed,
+            "samples": len(grouped),
+            "videos": total_videos,
+            "ratings": rating_total,
+            "expected_ratings": expected_ratings,
+            "rating_progress": round((rating_total / expected_ratings) * 100, 1) if expected_ratings else 0,
+        },
+        "participants": [
+            {
+                "username": row["username"],
+                "created_at": row["created_at"],
+                "updated_at": row["updated_at"],
+                "completed_at": row["completed_at"],
+                "rated_count": row["rated_count"],
+                "progress": round((row["rated_count"] / total_videos) * 100, 1) if total_videos else 0,
+            }
+            for row in participant_rows
+        ],
+        "method_stats": [
+            {
+                "method": row["method"],
+                "rating_count": row["rating_count"],
+                **{field: round(row[field], 3) if row[field] is not None else None for field in SCORE_FIELDS},
+            }
+            for row in method_rows
+        ],
+        "video_stats": [
+            {
+                "audio_id": row["audio_id"],
+                "method": row["method"],
+                "video_id": row["video_id"],
+                "rating_count": row["rating_count"],
+                **{field: round(row[field], 3) if row[field] is not None else None for field in SCORE_FIELDS},
+            }
+            for row in video_rows
+        ],
+    }
+
+
+@app.get("/api/admin/export.csv")
+def admin_export_csv(x_admin_session: str | None = Header(default=None)) -> StreamingResponse:
+    check_admin_session(x_admin_session)
+    return ratings_csv_response()
+
+
+@app.post("/api/admin/users/delete")
+def admin_delete_user(data: AdminUserIn, x_admin_session: str | None = Header(default=None)) -> dict[str, Any]:
+    check_admin_session(x_admin_session)
+    username = " ".join(data.username.strip().split())
+    with connect() as conn:
+        participant = fetch_participant_by_username(conn, username)
+        if not participant:
+            raise HTTPException(status_code=404, detail="用户不存在")
+        ratings_deleted = conn.execute(
+            "DELETE FROM ratings WHERE participant_id = ?",
+            (participant["id"],),
+        ).rowcount
+        conn.execute(
+            "DELETE FROM participants WHERE id = ?",
+            (participant["id"],),
+        )
+    return {"ok": True, "username": username, "ratings_deleted": ratings_deleted}
+
+
+@app.post("/api/admin/users/clear-ratings")
+def admin_clear_user_ratings(data: AdminUserIn, x_admin_session: str | None = Header(default=None)) -> dict[str, Any]:
+    check_admin_session(x_admin_session)
+    username = " ".join(data.username.strip().split())
+    now = utc_now()
+    with connect() as conn:
+        participant = fetch_participant_by_username(conn, username)
+        if not participant:
+            raise HTTPException(status_code=404, detail="用户不存在")
+        ratings_deleted = conn.execute(
+            "DELETE FROM ratings WHERE participant_id = ?",
+            (participant["id"],),
+        ).rowcount
+        conn.execute(
+            "UPDATE participants SET completed_at = NULL, updated_at = ? WHERE id = ?",
+            (now, participant["id"]),
+        )
+    return {"ok": True, "username": username, "ratings_deleted": ratings_deleted}
+
+
+@app.post("/api/admin/users/clear-all")
+def admin_clear_all_users(x_admin_session: str | None = Header(default=None)) -> dict[str, Any]:
+    check_admin_session(x_admin_session)
+    with connect() as conn:
+        ratings_deleted = conn.execute("DELETE FROM ratings").rowcount
+        users_deleted = conn.execute("DELETE FROM participants").rowcount
+    return {"ok": True, "users_deleted": users_deleted, "ratings_deleted": ratings_deleted}
+
+
 @app.get("/api/export.csv")
 def export_csv(
     token: str | None = Query(default=None),
     x_admin_token: str | None = Header(default=None),
 ) -> StreamingResponse:
     check_admin_token(token, x_admin_token)
+    return ratings_csv_response()
 
+
+def ratings_csv_response() -> StreamingResponse:
     def rows():
         header = [
             "participant_id",

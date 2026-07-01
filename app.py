@@ -26,7 +26,7 @@ ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "")
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", ADMIN_TOKEN)
 
-SCORE_FIELDS = ("visual_quality", "occlusion", "lip_sync", "teeth_quality")
+SCORE_FIELDS = ("visual_quality", "occlusion", "lip_sync", "teeth_quality", "identity_consistency")
 PASSWORD_ITERATIONS = 120_000
 ADMIN_SESSIONS: set[str] = set()
 
@@ -75,20 +75,23 @@ def public_video(item: dict[str, Any]) -> dict[str, str]:
     }
 
 
+def sample_sort_key(sample_id: str) -> tuple[int, int | str]:
+    return (0, int(sample_id)) if sample_id.isdigit() else (1, sample_id)
+
+
 def group_manifest(manifest: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
     groups: dict[str, list[dict[str, Any]]] = {}
     for item in manifest:
         groups.setdefault(item["audio_id"], []).append(item)
     for videos in groups.values():
         videos.sort(key=lambda item: item["method"])
-    return dict(sorted(groups.items()))
+    return dict(sorted(groups.items(), key=lambda item: sample_sort_key(item[0])))
 
 
 def create_order(manifest: list[dict[str, Any]]) -> dict[str, Any]:
     rng = random.SystemRandom()
     grouped = group_manifest(manifest)
     sample_ids = list(grouped)
-    rng.shuffle(sample_ids)
     video_order: dict[str, list[str]] = {}
     for sample_id, videos in grouped.items():
         ids = [item["id"] for item in videos]
@@ -123,7 +126,7 @@ def normalize_order(raw_order: Any, manifest: list[dict[str, Any]]) -> dict[str,
         samples = []
         video_order = {}
 
-    for sample in all_sample_ids:
+    for sample in grouped:
         if sample not in samples:
             samples.append(sample)
         known = set(video_order.get(sample, []))
@@ -145,7 +148,11 @@ def public_groups(order: dict[str, Any], manifest: list[dict[str, Any]]) -> list
                 public["label"] = f"视频 {index}"
                 videos.append(public)
         if videos:
-            groups.append({"audio_id": sample_id, "videos": videos})
+            group = {"audio_id": sample_id, "videos": videos}
+            reference_image = VIDEO_DIR / sample_id / "reference.jpg"
+            if reference_image.exists():
+                group["reference_image_url"] = f"/videos/{sample_id}/reference.jpg"
+            groups.append(group)
     return groups
 
 
@@ -194,6 +201,7 @@ def init_db() -> None:
                 occlusion INTEGER NOT NULL CHECK (occlusion BETWEEN 1 AND 5),
                 lip_sync INTEGER NOT NULL CHECK (lip_sync BETWEEN 1 AND 5),
                 teeth_quality INTEGER NOT NULL CHECK (teeth_quality BETWEEN 1 AND 5),
+                identity_consistency INTEGER NOT NULL CHECK (identity_consistency BETWEEN 1 AND 5),
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL,
                 PRIMARY KEY (participant_id, video_id),
@@ -201,6 +209,17 @@ def init_db() -> None:
             )
             """
         )
+        rating_columns = {
+            row["name"]
+            for row in conn.execute("PRAGMA table_info(ratings)").fetchall()
+        }
+        if "identity_consistency" not in rating_columns:
+            conn.execute(
+                """
+                ALTER TABLE ratings
+                ADD COLUMN identity_consistency INTEGER CHECK (identity_consistency BETWEEN 1 AND 5)
+                """
+            )
 
 
 class ParticipantIn(BaseModel):
@@ -216,6 +235,7 @@ class RatingIn(BaseModel):
     occlusion: int = Field(ge=1, le=5)
     lip_sync: int = Field(ge=1, le=5)
     teeth_quality: int = Field(ge=1, le=5)
+    identity_consistency: int = Field(ge=1, le=5)
 
 
 class CompleteIn(BaseModel):
@@ -305,7 +325,7 @@ def participant_payload(conn: sqlite3.Connection, participant: sqlite3.Row) -> d
     order = normalize_order(json.loads(participant["order_json"]), manifest)
     ratings = conn.execute(
         """
-        SELECT video_id, visual_quality, occlusion, lip_sync, teeth_quality, updated_at
+        SELECT video_id, visual_quality, occlusion, lip_sync, teeth_quality, identity_consistency, updated_at
         FROM ratings
         WHERE participant_id = ?
         """,
@@ -419,15 +439,16 @@ def save_rating(data: RatingIn) -> dict[str, Any]:
             """
             INSERT INTO ratings (
                 participant_id, video_id, audio_id, method,
-                visual_quality, occlusion, lip_sync, teeth_quality,
+                visual_quality, occlusion, lip_sync, teeth_quality, identity_consistency,
                 created_at, updated_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(participant_id, video_id) DO UPDATE SET
                 visual_quality = excluded.visual_quality,
                 occlusion = excluded.occlusion,
                 lip_sync = excluded.lip_sync,
                 teeth_quality = excluded.teeth_quality,
+                identity_consistency = excluded.identity_consistency,
                 updated_at = excluded.updated_at
             """,
             (
@@ -439,6 +460,7 @@ def save_rating(data: RatingIn) -> dict[str, Any]:
                 data.occlusion,
                 data.lip_sync,
                 data.teeth_quality,
+                data.identity_consistency,
                 created_at,
                 now,
             ),
@@ -461,7 +483,12 @@ def complete(data: CompleteIn) -> dict[str, Any]:
     }
     with connect() as conn:
         rated = conn.execute(
-            "SELECT COUNT(*) AS count FROM ratings WHERE participant_id = ?",
+            """
+            SELECT COUNT(*) AS count
+            FROM ratings
+            WHERE participant_id = ?
+              AND identity_consistency IS NOT NULL
+            """,
             (data.participant_id,),
         ).fetchone()["count"]
         if data.allow_partial:
@@ -471,7 +498,9 @@ def complete(data: CompleteIn) -> dict[str, Any]:
                 row["audio_id"]
                 for row in conn.execute(
                     """
-                    SELECT audio_id, COUNT(*) AS count
+                    SELECT
+                        audio_id,
+                        SUM(CASE WHEN identity_consistency IS NOT NULL THEN 1 ELSE 0 END) AS count
                     FROM ratings
                     WHERE participant_id = ?
                     GROUP BY audio_id
@@ -531,7 +560,9 @@ def admin_stats(x_admin_session: str | None = Header(default=None)) -> dict[str,
             FROM participants
             """
         ).fetchone()
-        rating_total = conn.execute("SELECT COUNT(*) AS count FROM ratings").fetchone()["count"]
+        rating_total = conn.execute(
+            "SELECT COUNT(*) AS count FROM ratings WHERE identity_consistency IS NOT NULL"
+        ).fetchone()["count"]
         participant_rows = conn.execute(
             """
             SELECT
@@ -539,7 +570,7 @@ def admin_stats(x_admin_session: str | None = Header(default=None)) -> dict[str,
                 p.created_at,
                 p.updated_at,
                 p.completed_at,
-                COUNT(r.video_id) AS rated_count
+                COUNT(CASE WHEN r.identity_consistency IS NOT NULL THEN r.video_id END) AS rated_count
             FROM participants p
             LEFT JOIN ratings r ON r.participant_id = p.id
             GROUP BY p.id
@@ -554,8 +585,10 @@ def admin_stats(x_admin_session: str | None = Header(default=None)) -> dict[str,
                 AVG(visual_quality) AS visual_quality,
                 AVG(occlusion) AS occlusion,
                 AVG(lip_sync) AS lip_sync,
-                AVG(teeth_quality) AS teeth_quality
+                AVG(teeth_quality) AS teeth_quality,
+                AVG(identity_consistency) AS identity_consistency
             FROM ratings
+            WHERE identity_consistency IS NOT NULL
             GROUP BY method
             ORDER BY method
             """
@@ -570,8 +603,10 @@ def admin_stats(x_admin_session: str | None = Header(default=None)) -> dict[str,
                 AVG(visual_quality) AS visual_quality,
                 AVG(occlusion) AS occlusion,
                 AVG(lip_sync) AS lip_sync,
-                AVG(teeth_quality) AS teeth_quality
+                AVG(teeth_quality) AS teeth_quality,
+                AVG(identity_consistency) AS identity_consistency
             FROM ratings
+            WHERE identity_consistency IS NOT NULL
             GROUP BY video_id
             ORDER BY audio_id, method
             """
@@ -699,6 +734,7 @@ def ratings_csv_response() -> StreamingResponse:
             "occlusion",
             "lip_sync",
             "teeth_quality",
+            "identity_consistency",
             "rating_created_at",
             "rating_updated_at",
         ]
@@ -727,6 +763,7 @@ def ratings_csv_response() -> StreamingResponse:
                     r.occlusion,
                     r.lip_sync,
                     r.teeth_quality,
+                    r.identity_consistency,
                     r.created_at AS rating_created_at,
                     r.updated_at AS rating_updated_at
                 FROM ratings r

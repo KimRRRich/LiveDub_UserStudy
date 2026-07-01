@@ -1,111 +1,147 @@
 [
   {
-    "id": "2782_2782_KeySync_cross_2862",
-    "audio_id": "2782",
-    "method": "2782_KeySync_cross_2862",
-    "url": "/videos/2782/2782_KeySync_cross_2862.mp4"
+    "id": "10165_10165_KeySync_cross_10794",
+    "audio_id": "10165",
+    "method": "10165_KeySync_cross_10794",
+    "url": "/videos/10165/10165_KeySync_cross_10794.mp4"
   },
   {
-    "id": "2782_2782_LatentSync_cross_2862",
-    "audio_id": "2782",
-    "method": "2782_LatentSync_cross_2862",
-    "url": "/videos/2782/2782_LatentSync_cross_2862.mp4"
+    "id": "10165_10165_LatentSync_cross_10794",
+    "audio_id": "10165",
+    "method": "10165_LatentSync_cross_10794",
+    "url": "/videos/10165/10165_LatentSync_cross_10794.mp4"
   },
   {
-    "id": "2782_2782_MuseTalk_cross_2862",
-    "audio_id": "2782",
-    "method": "2782_MuseTalk_cross_2862",
-    "url": "/videos/2782/2782_MuseTalk_cross_2862.mp4"
+    "id": "10165_10165_Mamba3DWithTeeth_selfref_ARTalk_cross_10794",
+    "audio_id": "10165",
+    "method": "10165_Mamba3DWithTeeth_selfref_ARTalk_cross_10794",
+    "url": "/videos/10165/10165_Mamba3DWithTeeth_selfref_ARTalk_cross_10794.mp4"
   },
   {
-    "id": "2862_2862_KeySync_cross_4153",
-    "audio_id": "2862",
-    "method": "2862_KeySync_cross_4153",
-    "url": "/videos/2862/2862_KeySync_cross_4153.mp4"
+    "id": "10165_10165_Mamba3DWithTeeth_selfref_GTFLAME103_cross_10794",
+    "audio_id": "10165",
+    "method": "10165_Mamba3DWithTeeth_selfref_GTFLAME103_cross_10794",
+    "url": "/videos/10165/10165_Mamba3DWithTeeth_selfref_GTFLAME103_cross_10794.mp4"
   },
   {
-    "id": "2862_2862_LatentSync_cross_4153",
-    "audio_id": "2862",
-    "method": "2862_LatentSync_cross_4153",
-    "url": "/videos/2862/2862_LatentSync_cross_4153.mp4"
+    "id": "14996_14996_KeySync_cross_15342",
+    "audio_id": "14996",
+    "method": "14996_KeySync_cross_15342",
+    "url": "/videos/14996/14996_KeySync_cross_15342.mp4"
   },
   {
-    "id": "2862_2862_MuseTalk_cross_4153",
-    "audio_id": "2862",
-    "method": "2862_MuseTalk_cross_4153",
-    "url": "/videos/2862/2862_MuseTalk_cross_4153.mp4"
+    "id": "14996_14996_LatentSync_cross_15342",
+    "audio_id": "14996",
+    "method": "14996_LatentSync_cross_15342",
+    "url": "/videos/14996/14996_LatentSync_cross_15342.mp4"
   },
   {
-    "id": "4153_4153_KeySync_cross_5118",
-    "audio_id": "4153",
-    "method": "4153_KeySync_cross_5118",
-    "url": "/videos/4153/4153_KeySync_cross_5118.mp4"
+    "id": "14996_14996_Mamba3DWithTeeth_selfref_ARTalk_cross_15342",
+    "audio_id": "14996",
+    "method": "14996_Mamba3DWithTeeth_selfref_ARTalk_cross_15342",
+    "url": "/videos/14996/14996_Mamba3DWithTeeth_selfref_ARTalk_cross_15342.mp4"
   },
   {
-    "id": "4153_4153_LatentSync_cross_5118",
-    "audio_id": "4153",
-    "method": "4153_LatentSync_cross_5118",
-    "url": "/videos/4153/4153_LatentSync_cross_5118.mp4"
+    "id": "14996_14996_Mamba3DWithTeeth_selfref_GTFLAME103_cross_15342",
+    "audio_id": "14996",
+    "method": "14996_Mamba3DWithTeeth_selfref_GTFLAME103_cross_15342",
+    "url": "/videos/14996/14996_Mamba3DWithTeeth_selfref_GTFLAME103_cross_15342.mp4"
   },
   {
-    "id": "4153_4153_MuseTalk_cross_5118",
-    "audio_id": "4153",
-    "method": "4153_MuseTalk_cross_5118",
-    "url": "/videos/4153/4153_MuseTalk_cross_5118.mp4"
+    "id": "3121_3121_KeySync_cross_4008",
+    "audio_id": "3121",
+    "method": "3121_KeySync_cross_4008",
+    "url": "/videos/3121/3121_KeySync_cross_4008.mp4"
   },
   {
-    "id": "565_565_KeySync_cross_5655",
-    "audio_id": "565",
-    "method": "565_KeySync_cross_5655",
-    "url": "/videos/565/565_KeySync_cross_5655.mp4"
+    "id": "3121_3121_LatentSync_cross_4008",
+    "audio_id": "3121",
+    "method": "3121_LatentSync_cross_4008",
+    "url": "/videos/3121/3121_LatentSync_cross_4008.mp4"
   },
   {
-    "id": "565_565_LatentSync_cross_5655",
-    "audio_id": "565",
-    "method": "565_LatentSync_cross_5655",
-    "url": "/videos/565/565_LatentSync_cross_5655.mp4"
+    "id": "3121_3121_Mamba3DWithTeeth_selfref_ARTalk_cross_4008",
+    "audio_id": "3121",
+    "method": "3121_Mamba3DWithTeeth_selfref_ARTalk_cross_4008",
+    "url": "/videos/3121/3121_Mamba3DWithTeeth_selfref_ARTalk_cross_4008.mp4"
   },
   {
-    "id": "565_565_MuseTalk_cross_5655",
-    "audio_id": "565",
-    "method": "565_MuseTalk_cross_5655",
-    "url": "/videos/565/565_MuseTalk_cross_5655.mp4"
+    "id": "3121_3121_Mamba3DWithTeeth_selfref_GTFLAME103_cross_4008",
+    "audio_id": "3121",
+    "method": "3121_Mamba3DWithTeeth_selfref_GTFLAME103_cross_4008",
+    "url": "/videos/3121/3121_Mamba3DWithTeeth_selfref_GTFLAME103_cross_4008.mp4"
   },
   {
-    "id": "649_649_KeySync_cross_666",
-    "audio_id": "649",
-    "method": "649_KeySync_cross_666",
-    "url": "/videos/649/649_KeySync_cross_666.mp4"
+    "id": "4008_4008_KeySync_cross_8070",
+    "audio_id": "4008",
+    "method": "4008_KeySync_cross_8070",
+    "url": "/videos/4008/4008_KeySync_cross_8070.mp4"
   },
   {
-    "id": "649_649_LatentSync_cross_666",
-    "audio_id": "649",
-    "method": "649_LatentSync_cross_666",
-    "url": "/videos/649/649_LatentSync_cross_666.mp4"
+    "id": "4008_4008_LatentSync_cross_8070",
+    "audio_id": "4008",
+    "method": "4008_LatentSync_cross_8070",
+    "url": "/videos/4008/4008_LatentSync_cross_8070.mp4"
   },
   {
-    "id": "649_649_MuseTalk_cross_666",
-    "audio_id": "649",
-    "method": "649_MuseTalk_cross_666",
-    "url": "/videos/649/649_MuseTalk_cross_666.mp4"
+    "id": "4008_4008_Mamba3DWithTeeth_selfref_ARTalk_cross_8070",
+    "audio_id": "4008",
+    "method": "4008_Mamba3DWithTeeth_selfref_ARTalk_cross_8070",
+    "url": "/videos/4008/4008_Mamba3DWithTeeth_selfref_ARTalk_cross_8070.mp4"
   },
   {
-    "id": "666_666_KeySync_cross_7287",
-    "audio_id": "666",
-    "method": "666_KeySync_cross_7287",
-    "url": "/videos/666/666_KeySync_cross_7287.mp4"
+    "id": "4008_4008_Mamba3DWithTeeth_selfref_GTFLAME103_cross_8070",
+    "audio_id": "4008",
+    "method": "4008_Mamba3DWithTeeth_selfref_GTFLAME103_cross_8070",
+    "url": "/videos/4008/4008_Mamba3DWithTeeth_selfref_GTFLAME103_cross_8070.mp4"
   },
   {
-    "id": "666_666_LatentSync_cross_7287",
-    "audio_id": "666",
-    "method": "666_LatentSync_cross_7287",
-    "url": "/videos/666/666_LatentSync_cross_7287.mp4"
+    "id": "4995_4995_KeySync_cross_8951",
+    "audio_id": "4995",
+    "method": "4995_KeySync_cross_8951",
+    "url": "/videos/4995/4995_KeySync_cross_8951.mp4"
   },
   {
-    "id": "666_666_MuseTalk_cross_7287",
-    "audio_id": "666",
-    "method": "666_MuseTalk_cross_7287",
-    "url": "/videos/666/666_MuseTalk_cross_7287.mp4"
+    "id": "4995_4995_LatentSync_cross_8951",
+    "audio_id": "4995",
+    "method": "4995_LatentSync_cross_8951",
+    "url": "/videos/4995/4995_LatentSync_cross_8951.mp4"
+  },
+  {
+    "id": "4995_4995_Mamba3DWithTeeth_selfref_ARTalk_cross_8951",
+    "audio_id": "4995",
+    "method": "4995_Mamba3DWithTeeth_selfref_ARTalk_cross_8951",
+    "url": "/videos/4995/4995_Mamba3DWithTeeth_selfref_ARTalk_cross_8951.mp4"
+  },
+  {
+    "id": "4995_4995_Mamba3DWithTeeth_selfref_GTFLAME103_cross_8951",
+    "audio_id": "4995",
+    "method": "4995_Mamba3DWithTeeth_selfref_GTFLAME103_cross_8951",
+    "url": "/videos/4995/4995_Mamba3DWithTeeth_selfref_GTFLAME103_cross_8951.mp4"
+  },
+  {
+    "id": "6779_6779_KeySync_cross_4995",
+    "audio_id": "6779",
+    "method": "6779_KeySync_cross_4995",
+    "url": "/videos/6779/6779_KeySync_cross_4995.mp4"
+  },
+  {
+    "id": "6779_6779_LatentSync_cross_4995",
+    "audio_id": "6779",
+    "method": "6779_LatentSync_cross_4995",
+    "url": "/videos/6779/6779_LatentSync_cross_4995.mp4"
+  },
+  {
+    "id": "6779_6779_Mamba3DWithTeeth_selfref_ARTalk_cross_4995",
+    "audio_id": "6779",
+    "method": "6779_Mamba3DWithTeeth_selfref_ARTalk_cross_4995",
+    "url": "/videos/6779/6779_Mamba3DWithTeeth_selfref_ARTalk_cross_4995.mp4"
+  },
+  {
+    "id": "6779_6779_Mamba3DWithTeeth_selfref_GTFLAME103_cross_4995",
+    "audio_id": "6779",
+    "method": "6779_Mamba3DWithTeeth_selfref_GTFLAME103_cross_4995",
+    "url": "/videos/6779/6779_Mamba3DWithTeeth_selfref_GTFLAME103_cross_4995.mp4"
   },
   {
     "id": "924_924_KeySync_cross_10165",
@@ -120,9 +156,39 @@
     "url": "/videos/924/924_LatentSync_cross_10165.mp4"
   },
   {
-    "id": "924_924_MuseTalk_cross_10165",
+    "id": "924_924_Mamba3DWithTeeth_selfref_ARTalk_cross_10165",
     "audio_id": "924",
-    "method": "924_MuseTalk_cross_10165",
-    "url": "/videos/924/924_MuseTalk_cross_10165.mp4"
+    "method": "924_Mamba3DWithTeeth_selfref_ARTalk_cross_10165",
+    "url": "/videos/924/924_Mamba3DWithTeeth_selfref_ARTalk_cross_10165.mp4"
+  },
+  {
+    "id": "924_924_Mamba3DWithTeeth_selfref_GTFLAME103_cross_10165",
+    "audio_id": "924",
+    "method": "924_Mamba3DWithTeeth_selfref_GTFLAME103_cross_10165",
+    "url": "/videos/924/924_Mamba3DWithTeeth_selfref_GTFLAME103_cross_10165.mp4"
+  },
+  {
+    "id": "9583_9583_KeySync_cross_4054",
+    "audio_id": "9583",
+    "method": "9583_KeySync_cross_4054",
+    "url": "/videos/9583/9583_KeySync_cross_4054.mp4"
+  },
+  {
+    "id": "9583_9583_LatentSync_cross_4054",
+    "audio_id": "9583",
+    "method": "9583_LatentSync_cross_4054",
+    "url": "/videos/9583/9583_LatentSync_cross_4054.mp4"
+  },
+  {
+    "id": "9583_9583_Mamba3DWithTeeth_selfref_ARTalk_cross_4054",
+    "audio_id": "9583",
+    "method": "9583_Mamba3DWithTeeth_selfref_ARTalk_cross_4054",
+    "url": "/videos/9583/9583_Mamba3DWithTeeth_selfref_ARTalk_cross_4054.mp4"
+  },
+  {
+    "id": "9583_9583_Mamba3DWithTeeth_selfref_GTFLAME103_cross_4054",
+    "audio_id": "9583",
+    "method": "9583_Mamba3DWithTeeth_selfref_GTFLAME103_cross_4054",
+    "url": "/videos/9583/9583_Mamba3DWithTeeth_selfref_GTFLAME103_cross_4054.mp4"
   }
 ]

@@ -258,6 +258,42 @@ input {
   font-weight: 700;
 }
 
+.reference-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 128px;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.reference-label {
+  margin: 0 0 4px;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.reference-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+  font-weight: 700;
+}
+
+.reference-panel img {
+  display: block;
+  width: 128px;
+  height: 128px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: #111722;
+}
+
 .save-status {
   color: var(--ok);
 }
@@ -506,6 +542,7 @@ td.empty {
   }
 
   .sample-meta,
+  .reference-panel,
   .actions,
   .panel-actions {
     grid-template-columns: 1fr;
@@ -513,6 +550,12 @@ td.empty {
 
   .sample-meta {
     display: grid;
+  }
+
+  .reference-panel img {
+    width: min(100%, 180px);
+    height: auto;
+    aspect-ratio: 1 / 1;
   }
 
   .actions {

@@ -1,8 +1,9 @@
 const FIELDS = [
   ["visual_quality", "画面质量"],
-  ["occlusion", "遮挡情况"],
+  ["occlusion", "遮挡处理"],
   ["lip_sync", "唇形同步"],
   ["teeth_quality", "牙齿质量"],
+  ["identity_consistency", "身份一致性"],
 ];
 const STORAGE_ID = "userstudy_participant_id";
 const STORAGE_NAME = "userstudy_username";
@@ -119,11 +120,15 @@ function totalVideoCount() {
 }
 
 function completedVideoCount() {
-  return Object.keys(state.ratings).length;
+  return Object.values(state.ratings).filter(videoRatingComplete).length;
+}
+
+function videoRatingComplete(rating) {
+  return rating && FIELDS.every(([field]) => Number.isInteger(rating[field]));
 }
 
 function groupRated(group) {
-  return group.videos.every((video) => state.ratings[video.id]);
+  return group.videos.every((video) => videoRatingComplete(state.ratings[video.id]));
 }
 
 function groupStarted(group) {
@@ -265,6 +270,7 @@ function renderCurrent() {
   $("participantLabel").textContent = state.participant.username;
   $("progressTitle").textContent = `样本 ${state.index + 1} / ${state.groups.length}`;
   $("sampleIndex").textContent = `当前样本：${group.audio_id}`;
+  $("sampleReference").innerHTML = sampleReferenceBlock(group);
   $("videoGrid").innerHTML = group.videos.map(videoCard).join("");
   $("prevBtn").disabled = state.index === 0;
   $("nextBtn").textContent = state.index === state.groups.length - 1 ? "保存并完成" : "保存并下一个样本";
@@ -272,6 +278,21 @@ function renderCurrent() {
   updateProgress();
   renderSampleNav();
   wireVideoPlayback();
+}
+
+function sampleReferenceBlock(group) {
+  if (!group.reference_image_url) {
+    return "";
+  }
+  return `
+    <section class="reference-panel" aria-label="原始人物参考图">
+      <div>
+        <p class="reference-label">原始人物参考图</p>
+        <p class="reference-note">用于观察配音后身份一致性保持情况</p>
+      </div>
+      <img src="${group.reference_image_url}" alt="样本 ${escapeHtml(group.audio_id)} 的原始人物参考图" />
+    </section>
+  `;
 }
 
 function readVideoRating(video) {
@@ -440,11 +461,12 @@ function renderAdminStats(data) {
               <td>${formatValue(row.occlusion)}</td>
               <td>${formatValue(row.lip_sync)}</td>
               <td>${formatValue(row.teeth_quality)}</td>
+              <td>${formatValue(row.identity_consistency)}</td>
             </tr>
           `,
         )
         .join("")
-    : `<tr><td class="empty" colspan="6">暂无评分数据</td></tr>`;
+    : `<tr><td class="empty" colspan="7">暂无评分数据</td></tr>`;
 
   $("adminVideos").innerHTML = data.video_stats.length
     ? data.video_stats
@@ -458,11 +480,12 @@ function renderAdminStats(data) {
               <td>${formatValue(row.occlusion)}</td>
               <td>${formatValue(row.lip_sync)}</td>
               <td>${formatValue(row.teeth_quality)}</td>
+              <td>${formatValue(row.identity_consistency)}</td>
             </tr>
           `,
         )
         .join("")
-    : `<tr><td class="empty" colspan="7">暂无评分数据</td></tr>`;
+    : `<tr><td class="empty" colspan="8">暂无评分数据</td></tr>`;
 }
 
 async function loadAdminStats() {

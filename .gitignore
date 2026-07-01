@@ -1,0 +1,47 @@
+# Python caches and build outputs
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# Local Python environments
+.venv/
+venv/
+env/
+ENV/
+
+# Runtime database files
+data/*
+!data/.gitkeep
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+*.sqlite-shm
+*.sqlite-wal
+
+# Local secrets and environment overrides
+.env
+.env.*
+*.local
+
+# Logs and local exports
+*.log
+logs/
+userstudy_ratings.csv
+
+# Editor and OS files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

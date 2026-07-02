@@ -1,0 +1,242 @@
+[
+  {
+    "sample_id": "666",
+    "source_video": "/home/kim/work/LiveDub_UserStudy/data/celebv15_crossaudio/666/crop_512/512.mp4",
+    "reference_image": "/home/kim/work/LiveDub_UserStudy/videos/666/reference.jpg",
+    "frame_index": 221,
+    "crop_xyxy": [
+      64,
+      96,
+      448,
+      480
+    ],
+    "output_size": [
+      384,
+      384
+    ]
+  },
+  {
+    "sample_id": "924",
+    "source_video": "/home/kim/work/LiveDub_UserStudy/data/celebv15_crossaudio/924/crop_512/512.mp4",
+    "reference_image": "/home/kim/work/LiveDub_UserStudy/videos/924/reference.jpg",
+    "frame_index": 373,
+    "crop_xyxy": [
+      64,
+      96,
+      448,
+      480
+    ],
+    "output_size": [
+      384,
+      384
+    ]
+  },
+  {
+    "sample_id": "2862",
+    "source_video": "/home/kim/work/LiveDub_UserStudy/data/celebv15_crossaudio/2862/crop_512/512.mp4",
+    "reference_image": "/home/kim/work/LiveDub_UserStudy/videos/2862/reference.jpg",
+    "frame_index": 122,
+    "crop_xyxy": [
+      64,
+      96,
+      448,
+      480
+    ],
+    "output_size": [
+      384,
+      384
+    ]
+  },
+  {
+    "sample_id": "3121",
+    "source_video": "/home/kim/work/LiveDub_UserStudy/data/celebv15_crossaudio/3121/crop_512/512.mp4",
+    "reference_image": "/home/kim/work/LiveDub_UserStudy/videos/3121/reference.jpg",
+    "frame_index": 164,
+    "crop_xyxy": [
+      64,
+      96,
+      448,
+      480
+    ],
+    "output_size": [
+      384,
+      384
+    ]
+  },
+  {
+    "sample_id": "4008",
+    "source_video": "/home/kim/work/LiveDub_UserStudy/data/celebv15_crossaudio/4008/crop_512/512.mp4",
+    "reference_image": "/home/kim/work/LiveDub_UserStudy/videos/4008/reference.jpg",
+    "frame_index": 58,
+    "crop_xyxy": [
+      64,
+      96,
+      448,
+      480
+    ],
+    "output_size": [
+      384,
+      384
+    ]
+  },
+  {
+    "sample_id": "4995",
+    "source_video": "/home/kim/work/LiveDub_UserStudy/data/celebv15_crossaudio/4995/crop_512/512.mp4",
+    "reference_image": "/home/kim/work/LiveDub_UserStudy/videos/4995/reference.jpg",
+    "frame_index": 100,
+    "crop_xyxy": [
+      64,
+      96,
+      448,
+      480
+    ],
+    "output_size": [
+      384,
+      384
+    ]
+  },
+  {
+    "sample_id": "5208",
+    "source_video": "/home/kim/work/LiveDub_UserStudy/data/celebv15_crossaudio/5208/crop_512/512.mp4",
+    "reference_image": "/home/kim/work/LiveDub_UserStudy/videos/5208/reference.jpg",
+    "frame_index": 73,
+    "crop_xyxy": [
+      64,
+      96,
+      448,
+      480
+    ],
+    "output_size": [
+      384,
+      384
+    ]
+  },
+  {
+    "sample_id": "5500",
+    "source_video": "/home/kim/work/LiveDub_UserStudy/data/celebv15_crossaudio/5500/crop_512/512.mp4",
+    "reference_image": "/home/kim/work/LiveDub_UserStudy/videos/5500/reference.jpg",
+    "frame_index": 360,
+    "crop_xyxy": [
+      64,
+      96,
+      448,
+      480
+    ],
+    "output_size": [
+      384,
+      384
+    ]
+  },
+  {
+    "sample_id": "6779",
+    "source_video": "/home/kim/work/LiveDub_UserStudy/data/celebv15_crossaudio/6779/crop_512/512.mp4",
+    "reference_image": "/home/kim/work/LiveDub_UserStudy/videos/6779/reference.jpg",
+    "frame_index": 132,
+    "crop_xyxy": [
+      64,
+      96,
+      448,
+      480
+    ],
+    "output_size": [
+      384,
+      384
+    ]
+  },
+  {
+    "sample_id": "8516",
+    "source_video": "/home/kim/work/LiveDub_UserStudy/data/celebv15_crossaudio/8516/crop_512/512.mp4",
+    "reference_image": "/home/kim/work/LiveDub_UserStudy/videos/8516/reference.jpg",
+    "frame_index": 47,
+    "crop_xyxy": [
+      64,
+      96,
+      448,
+      480
+    ],
+    "output_size": [
+      384,
+      384
+    ]
+  },
+  {
+    "sample_id": "9583",
+    "source_video": "/home/kim/work/LiveDub_UserStudy/data/celebv15_crossaudio/9583/crop_512/512.mp4",
+    "reference_image": "/home/kim/work/LiveDub_UserStudy/videos/9583/reference.jpg",
+    "frame_index": 47,
+    "crop_xyxy": [
+      64,
+      96,
+      448,
+      480
+    ],
+    "output_size": [
+      384,
+      384
+    ]
+  },
+  {
+    "sample_id": "9790",
+    "source_video": "/home/kim/work/LiveDub_UserStudy/data/celebv15_crossaudio/9790/crop_512/512.mp4",
+    "reference_image": "/home/kim/work/LiveDub_UserStudy/videos/9790/reference.jpg",
+    "frame_index": 10,
+    "crop_xyxy": [
+      64,
+      96,
+      448,
+      480
+    ],
+    "output_size": [
+      384,
+      384
+    ]
+  },
+  {
+    "sample_id": "10165",
+    "source_video": "/home/kim/work/LiveDub_UserStudy/data/celebv15_crossaudio/10165/crop_512/512.mp4",
+    "reference_image": "/home/kim/work/LiveDub_UserStudy/videos/10165/reference.jpg",
+    "frame_index": 166,
+    "crop_xyxy": [
+      64,
+      96,
+      448,
+      480
+    ],
+    "output_size": [
+      384,
+      384
+    ]
+  },
+  {
+    "sample_id": "14996",
+    "source_video": "/home/kim/work/LiveDub_UserStudy/data/celebv15_crossaudio/14996/crop_512/512.mp4",
+    "reference_image": "/home/kim/work/LiveDub_UserStudy/videos/14996/reference.jpg",
+    "frame_index": 389,
+    "crop_xyxy": [
+      64,
+      96,
+      448,
+      480
+    ],
+    "output_size": [
+      384,
+      384
+    ]
+  },
+  {
+    "sample_id": "15748",
+    "source_video": "/home/kim/work/LiveDub_UserStudy/data/celebv15_crossaudio/15748/crop_512/512.mp4",
+    "reference_image": "/home/kim/work/LiveDub_UserStudy/videos/15748/reference.jpg",
+    "frame_index": 97,
+    "crop_xyxy": [
+      64,
+      96,
+      448,
+      480
+    ],
+    "output_size": [
+      384,
+      384
+    ]
+  }
+]

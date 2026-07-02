@@ -19,6 +19,7 @@ ENV/
 
 # Runtime database files
 data/*
+data/celebv15_crossaudio/
 !data/.gitkeep
 *.db
 *.sqlite

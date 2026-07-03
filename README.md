@@ -72,6 +72,41 @@ admin
 优先使用 ADMIN_PASSWORD；如果没有设置 ADMIN_PASSWORD，则使用 ADMIN_TOKEN。
 ```
 
+## 临时后台运行
+
+如果只是临时在公网服务器上启动服务，不想因为 SSH 终端关闭导致页面无法访问，可以用 `nohup` 后台运行：
+
+```bash
+cd /home/kim/work/LiveDub_UserStudy
+nohup .venv/bin/uvicorn app:app --host 0.0.0.0 --port 8000 > userstudy.log 2>&1 &
+```
+
+查看进程是否还在：
+
+```bash
+ps -ef | grep 'uvicorn app:app' | grep -v grep
+```
+
+查看日志：
+
+```bash
+tail -f /home/kim/work/LiveDub_UserStudy/userstudy.log
+```
+
+停止服务：
+
+```bash
+pkill -f 'uvicorn app:app'
+```
+
+访问地址：
+
+```text
+http://服务器公网IP:8000
+```
+
+注意：服务器安全组和本机防火墙都需要放行 `8000/tcp`。`nohup` 适合临时实验；长期部署建议使用下面的 `systemd` + `nginx` 流程。
+
 ## 视频命名
 
 推荐把视频按样本目录放到 `videos/`：

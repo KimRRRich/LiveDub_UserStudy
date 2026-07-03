@@ -271,6 +271,7 @@ function renderCurrent() {
   $("progressTitle").textContent = `样本 ${state.index + 1} / ${state.groups.length}`;
   $("sampleIndex").textContent = `当前样本：${group.audio_id}`;
   $("sampleReference").innerHTML = sampleReferenceBlock(group);
+  $("videoGrid").className = `video-grid video-count-${group.videos.length}`;
   $("videoGrid").innerHTML = group.videos.map(videoCard).join("");
   $("prevBtn").disabled = state.index === 0;
   $("nextBtn").textContent = state.index === state.groups.length - 1 ? "保存并完成" : "保存并下一个样本";

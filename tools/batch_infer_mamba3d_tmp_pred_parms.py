@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Batch Mamba3DWithTeeth inference from precomputed [T,103] motion tensors.
 
-The output layout follows the existing user-study videos:
-  videos/{sample_id}/{sample_id}_Mamba3DWithTeeth_selfref_A2M_cross_{source_id}.mp4
+For FLAME103 tensors, this follows the GT-FLAME103 replacement convention in
+batch_infer_Mamba3DWithTeeth_crossaudio_clean20.py:
+  pred[:, :100]    -> exp_code[:, :100]
+  pred[:, 100:103] -> flame_pose_params[:, :3]
 
 This script does not load or run ARTalk.
 """
@@ -175,6 +177,24 @@ def main() -> None:
     parser.add_argument("--samples", nargs="*", help="Optional sample ids to process")
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--output_root", default=str(VIDEOS_ROOT))
+    parser.add_argument("--pred_dir", default=str(PRED_DIR), help="Directory with {sample_id}_pred_a2m_parms.pt tensors")
+    parser.add_argument(
+        "--audio_source",
+        choices=("infer", "original"),
+        default="infer",
+        help="infer uses sample/infer_audio.wav; original uses sample/audio/audio.wav",
+    )
+    parser.add_argument(
+        "--source_id_mode",
+        choices=("cross", "self"),
+        default="cross",
+        help="cross uses the manifest source id in the output name; self uses sample_id",
+    )
+    parser.add_argument(
+        "--clear_existing_a2m",
+        action="store_true",
+        help="Remove existing A2M mp4 files in each output sample dir before writing the new one",
+    )
     parser.add_argument("--recompute", action="store_true", help="Recompute latent caches")
     parser.add_argument("--max_frames", type=int, default=0, help="Debug cap; 0 means no extra cap")
     args = parser.parse_args()
@@ -196,18 +216,19 @@ def main() -> None:
     flame_model, vae, wav2lip, refine, renderer, bufs, mask_expand = ref.build_models(cfg, win_size, device)
 
     output_root = Path(args.output_root)
+    pred_dir = Path(args.pred_dir)
     mapping = load_cross_source_map(DATA_ROOT, VIDEOS_ROOT)
-    samples = list_samples(DATA_ROOT, PRED_DIR, args.samples)
-    print(f"Found {len(samples)} samples. Results -> {output_root}")
+    samples = list_samples(DATA_ROOT, pred_dir, args.samples)
+    print(f"Found {len(samples)} samples. Pred -> {pred_dir}. Results -> {output_root}")
 
     total_frames = 0
     total_time = 0.0
     for index, sample_id in enumerate(samples, start=1):
         sample_dir = DATA_ROOT / sample_id
-        pred_path = PRED_DIR / f"{sample_id}_pred_a2m_parms.pt"
+        pred_path = pred_dir / f"{sample_id}_pred_a2m_parms.pt"
         video_path = sample_dir / "crop_512" / "512.mp4"
-        audio_path = sample_dir / "infer_audio.wav"
-        source_id = mapping.get(sample_id, "unknown")
+        audio_path = sample_dir / ("infer_audio.wav" if args.audio_source == "infer" else "audio/audio.wav")
+        source_id = sample_id if args.source_id_mode == "self" else mapping.get(sample_id, "unknown")
         out_dir = output_root / sample_id
         out_dir.mkdir(parents=True, exist_ok=True)
         out_path = out_dir / f"{sample_id}_{METHOD_NAME}_cross_{source_id}.mp4"
@@ -222,6 +243,10 @@ def main() -> None:
         if not audio_path.exists():
             print(f"  [SKIP] missing infer audio: {audio_path}")
             continue
+        if args.clear_existing_a2m:
+            for old_path in out_dir.glob(f"{sample_id}_{METHOD_NAME}_cross_*.mp4"):
+                if old_path != out_path:
+                    old_path.unlink()
         if out_path.exists() and not args.overwrite:
             ref.add_audio_to_video(str(out_path), str(audio_path))
             if ref.video_ready_with_audio(str(out_path)):

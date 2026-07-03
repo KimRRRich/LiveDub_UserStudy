@@ -29,7 +29,7 @@
 cd /home/kim/work/LiveDub_UserStudy
 python3 -m venv .venv
 . .venv/bin/activate
-pip install -r requirements.txt
+  pip install -r requirements.txt
 python tools/build_manifest.py --video-dir videos --output videos.json
 ADMIN_TOKEN=my-token ADMIN_USERNAME=admin ADMIN_PASSWORD=123456 uvicorn app:app --host 0.0.0.0 --port 8000
 ```
@@ -78,8 +78,11 @@ admin
 
 ```bash
 cd /home/kim/work/LiveDub_UserStudy
+ADMIN_TOKEN=my-token ADMIN_USERNAME=admin ADMIN_PASSWORD=147331044 \
 nohup .venv/bin/uvicorn app:app --host 0.0.0.0 --port 8000 > userstudy.log 2>&1 &
 ```
+
+把 `my-token` 和 `123456` 换成你自己的强随机值。`ADMIN_USERNAME` / `ADMIN_PASSWORD` 用于管理员后台登录，`ADMIN_TOKEN` 也会用于兼容旧的 token 导出接口。
 
 查看进程是否还在：
 
